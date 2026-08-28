@@ -14,17 +14,36 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
+  imagePublicId String?
   passwordHash  String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts     Account[]
-  sessions     Session[]
-  portfolios   Portfolio[]
-  watchlists   Watchlist[]
-  transactions Transaction[]
+  accounts              Account[]
+  sessions              Session[]
+  portfolios            Portfolio[]
+  watchlists            Watchlist[]
+  transactions          Transaction[]
+  verificationDocuments VerificationDocument[]
 
   @@map("users")
+}
+
+model VerificationDocument {
+  id               String             @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String             @db.ObjectId
+  publicId         String             @unique
+  secureUrl        String
+  resourceType     String
+  originalFilename String?
+  status           VerificationStatus @default(PENDING)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("verification_documents")
 }
 
 model Account {
@@ -134,4 +153,10 @@ enum TransactionType {
   WITHDRAWAL
   DIVIDEND
   FEE
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
