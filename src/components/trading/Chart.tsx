@@ -307,7 +307,7 @@ function OrderTicket({
           onSubmit?.({
             side,
             quantity: Number(quantity),
-            price: limitPrice ? Number(limitPrice) : undefined,
+            price: limitPrice ? Number(limitPrice) : price,
           })
         }
       >

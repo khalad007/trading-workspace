@@ -1,0 +1,10 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { requireCurrentUser } from "@/lib/current-user";
+import prisma from "@/lib/prisma";
+
+export default async function TransactionsPage() {
+  const user = await requireCurrentUser();
+  const transactions = await prisma.transaction.findMany({ where: { userId: user.id }, include: { portfolio: { select: { name: true } } }, orderBy: { occurredAt: "desc" }, take: 250 });
+  return <div className="space-y-5"><div><h1 className="text-2xl font-semibold">Transactions</h1><p className="text-sm text-muted-foreground">Your simulated trading history.</p></div><Card><CardHeader><CardTitle>Execution ledger</CardTitle><CardDescription>Most recent 250 transactions.</CardDescription></CardHeader><CardContent><Table><TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Portfolio</TableHead><TableHead>Side</TableHead><TableHead>Symbol</TableHead><TableHead className="text-right">Quantity</TableHead><TableHead className="text-right">Price</TableHead><TableHead className="text-right">Amount</TableHead></TableRow></TableHeader><TableBody>{transactions.map((item) => <TableRow key={item.id}><TableCell>{item.occurredAt.toLocaleString()}</TableCell><TableCell>{item.portfolio.name}</TableCell><TableCell className={item.type === "BUY" ? "text-rose-500" : "text-emerald-500"}>{item.type}</TableCell><TableCell>{item.symbol ?? "—"}</TableCell><TableCell className="text-right font-mono">{item.quantity?.toFixed(6) ?? "—"}</TableCell><TableCell className="text-right font-mono">{item.price ? `$${item.price.toLocaleString()}` : "—"}</TableCell><TableCell className="text-right font-mono">${item.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}</TableCell></TableRow>)}</TableBody></Table>{transactions.length === 0 ? <p className="py-12 text-center text-muted-foreground">No transactions yet.</p> : null}</CardContent></Card></div>;
+}
