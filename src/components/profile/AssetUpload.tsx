@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import { CldUploadWidget } from "next-cloudinary";
 import { FileCheck2, ImagePlus, Loader2, ShieldCheck } from "lucide-react";
 
@@ -20,12 +21,14 @@ type AssetUploadProps = {
   userId: string;
   kind: AssetKind;
   onSaved?: () => void;
+  initialImageUrl?: string | null;
 };
 
-export function AssetUpload({ userId, kind, onSaved }: AssetUploadProps) {
+export function AssetUpload({ userId, kind, onSaved, initialImageUrl }: AssetUploadProps) {
   const [isSaving, startSaving] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const isProfile = kind === "profile";
+  const [imageUrl, setImageUrl] = useState(initialImageUrl ?? null);
   const folder = `trading-workspace/users/${userId}/${kind}`;
 
   return (
@@ -42,6 +45,21 @@ export function AssetUpload({ userId, kind, onSaved }: AssetUploadProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
+        {isProfile && imageUrl ? (
+          <div className="flex items-center gap-4 rounded-xl border bg-muted/30 p-3">
+            <Image
+              src={imageUrl}
+              alt="Current profile"
+              width={80}
+              height={80}
+              className="size-20 rounded-full border object-cover shadow-sm"
+            />
+            <div>
+              <p className="text-sm font-medium">Current profile image</p>
+              <p className="text-xs text-muted-foreground">Upload a new image to replace it.</p>
+            </div>
+          </div>
+        ) : null}
         <CldUploadWidget
           signatureEndpoint="/api/cloudinary/signature"
           options={{
@@ -69,6 +87,7 @@ export function AssetUpload({ userId, kind, onSaved }: AssetUploadProps) {
                   resourceType: info.resource_type,
                   originalFilename: info.original_filename,
                 });
+                if (isProfile) setImageUrl(info.secure_url);
                 setMessage(isProfile ? "Profile image updated." : "Document submitted for verification.");
                 onSaved?.();
               } catch (error) {
