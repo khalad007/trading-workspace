@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  BookOpen,
   Settings,
   Star,
   X,
@@ -25,6 +26,7 @@ const links = [
   { href: "/portfolio", label: "Portfolio", icon: BriefcaseBusiness },
   { href: "/watchlists", label: "Watchlists", icon: Star },
   { href: "/transactions", label: "Transactions", icon: BarChart3 },
+  { href: "/documentation", label: "Documentation", icon: BookOpen },
   { href: "/profile", label: "Profile", icon: Settings },
 ];
 
@@ -44,7 +46,7 @@ export function AppShell({
         <div className="grid size-8 place-items-center rounded-lg bg-emerald-500 text-slate-950">
           <CandlestickChart className="size-5" />
         </div>
-        <span className="font-semibold tracking-tight">MarketFlow</span>
+        <span className="font-semibold tracking-tight"><Link href="/">MarketFlow</Link></span>
       </div>
       <nav className="flex-1 space-y-1 p-3">
         {links.map(({ href, label, icon: Icon }) => {

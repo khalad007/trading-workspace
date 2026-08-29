@@ -64,6 +64,7 @@ type TradingChartProps = {
 };
 
 const TIMEFRAME_SECONDS = 60;
+const EXCHANGE_STORAGE_KEY = "marketflow.preferredExchange";
 
 const formatPrice = (value?: number) =>
   value === undefined
@@ -353,7 +354,7 @@ function ExecutionOverlay({ execution }: { execution?: OrderExecution | null }) 
 }
 
 export default function TradingChart({
-  exchange = "binance",
+  exchange = "coinbase",
   symbol = "BTCUSDT",
   initialCandles = [],
   execution,
@@ -361,6 +362,21 @@ export default function TradingChart({
   onOrderSubmit,
 }: TradingChartProps) {
   const [activeExchange, setActiveExchange] = useState(exchange);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const savedExchange = window.localStorage.getItem(EXCHANGE_STORAGE_KEY);
+      if (savedExchange === "binance" || savedExchange === "coinbase") {
+        setActiveExchange(savedExchange);
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  const selectExchange = (nextExchange: MarketExchange) => {
+    setActiveExchange(nextExchange);
+    window.localStorage.setItem(EXCHANGE_STORAGE_KEY, nextExchange);
+  };
   const market = useMarketData({ exchange: activeExchange, symbol, depth: 20 });
   const isConnected = market.status === "connected";
   const change = market.price?.change24hPercent;
@@ -397,8 +413,8 @@ export default function TradingChart({
                   <ChevronDown data-icon="inline-end" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setActiveExchange("binance")}>Binance</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setActiveExchange("coinbase")}>Coinbase</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => selectExchange("coinbase")}>Coinbase</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => selectExchange("binance")}>Binance</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </CardAction>

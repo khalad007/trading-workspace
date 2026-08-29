@@ -88,7 +88,7 @@ const sortedLevels = (
     .map(([price, quantity]) => ({ price, quantity }));
 
 export function useMarketData({
-  exchange = "binance",
+  exchange = "coinbase",
   symbol = "BTCUSDT",
   depth = 20,
   enabled = true,
